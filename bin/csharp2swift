@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'methadone'
+require 'objc_2_swift'
+
+module SwiftTools
+  class Csharp2Swift
+    include Methadone::Main
+    include Methadone::CLILogging
+
+    main do |cs_file|
+      if File.extname(cs_file) != '.cs'
+      end
+
+    end
+
+    version SwiftTools::VERSION
+    description 'Rough C# to Swift Converter'
+    arg :h_file, :required
+    arg :m_file
+
+    go!
+  end
+end

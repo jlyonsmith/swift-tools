@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'methadone'
+require 'objc_2_swift'
+
+module SwiftTools
+  class Objc2Swift
+    include Methadone::Main
+    include Methadone::CLILogging
+
+    main do |h_file, m_file|
+      if File.extname(h_file) != '.h'
+      end
+
+    end
+
+    version SwiftTools::VERSION
+    description 'Rough Objective-C to Swift Converter'
+    arg :h_file, :required
+    arg :m_file
+
+    go!
+  end
+end
