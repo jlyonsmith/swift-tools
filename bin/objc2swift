@@ -1,11 +1,12 @@
 #!/usr/bin/env ruby
 
 require 'rubygems'
+require 'bundler'
 require 'methadone'
 require 'objc_2_swift'
 
 module SwiftTools
-  class Objc2Swift
+  class Tool
     include Methadone::Main
     include Methadone::CLILogging
 

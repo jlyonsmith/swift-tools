@@ -1,7 +1,10 @@
 module SwiftTools
   class Objc2Swift
-    def initialize()
 
+    def initialize
+      @renamed_vars = {}
+      @renamed_methods = {}
     end
+
   end
 end
