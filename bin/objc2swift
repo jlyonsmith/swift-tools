@@ -16,21 +16,22 @@ module SwiftTools
       end
 
       unless File.exist?(h_filename)
-        exit_now! 127, "File #{h_filename} does not exist"
+        exit_now! 127, "File '#{h_filename}' does not exist"
       end
 
       unless m_filename.nil?
-        unless File.extname(m_filename) != '.m'
+        unless File.extname(m_filename) == '.m'
           exit_now! 127, "Implementation file must end in .m"
         end
 
         unless File.exists?(m_filename)
-          exit_now! 127, "File #{m_filename} does not exist"
+          exit_now! 127, "File '#{m_filename}' does not exist"
         end
       end
 
       h_file = File.new(h_filename, "r")
-      swift_filename = options[:swift_filename]
+      m_file = m_filename.nil? ? nil : File.new(m_filename, "r")
+      swift_filename = options[:o]
 
       if swift_filename.nil?
         swift_file = STDOUT
@@ -42,10 +43,7 @@ module SwiftTools
       tool.execute(h_file, m_file, swift_file, options)
 
       info "\"#{h_filename}\"" + (m_filename.nil? ? '' : " + #{m_filename}") + " -> \"#{swift_filename}\""
-
-      # tool.renamed_vars.each {|k,v| puts k + ' -> ' + v}
-      # tool.renamed_methods.each {|k,v| puts k + '() -> ' + v + '()'}
-    end
+   end
 
     version SwiftTools::VERSION
     description 'Rough Objective-C to Swift Converter'

@@ -6,10 +6,20 @@ module SwiftTools
       @renamed_methods = {}
     end
 
-    def execute(cs_file, swift_file, options)
-      content = cs_file.read()
+    def execute(h_file, m_file, swift_file, options)
+      hdr_content = h_file.read()
 
-      # Things that clean up the code and make other regex's easier
+      hdr_imports = extract_imports(hdr_content)
+      hdr_statics = extract_statics(hdr_content)
+      hdr_interface = extract_interface(hdr_content)
+
+      unless m_file.nil?
+        impl_content += m_file.read()
+        impl_imports = extract_imports(impl_content)
+        impl_statics = e
+      end
+
+      # Delay doing this to make other regex's easier
       remove_eol_semicolons(content)
 
       swift_file.write(content)
