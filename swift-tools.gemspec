@@ -1,11 +1,6 @@
-# coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'swift_tools'
-
 Gem::Specification.new do |s|
   s.name = 'swift-tools'
-  s.version = SwiftTools::VERSION
+  s.version = "2.0.0"
   s.summary = %q{Tools for managing Swift source code}
   s.description = %q{}
   s.authors = ["John Lyon-smith"]

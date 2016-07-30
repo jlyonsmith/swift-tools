@@ -4,6 +4,7 @@ require 'rubygems'
 require 'bundler'
 require 'methadone'
 require 'objc_2_swift'
+require 'swift_tools'
 
 module SwiftTools
   class Tool
@@ -35,6 +36,7 @@ module SwiftTools
 
       if swift_filename.nil?
         swift_file = STDOUT
+        swift_filename = "STDOUT"
       else
         swift_file = File.new(swift_filename, 'w+')
       end
@@ -42,7 +44,7 @@ module SwiftTools
       tool = ObjC2Swift.new
       tool.execute(h_file, m_file, swift_file, options)
 
-      info "\"#{h_filename}\"" + (m_filename.nil? ? '' : " + #{m_filename}") + " -> \"#{swift_filename}\""
+      info "\"#{h_filename}\"" + (m_filename.nil? ? '' : " + \"#{m_filename}\"") + " -> \"#{swift_filename}\""
    end
 
     version SwiftTools::VERSION

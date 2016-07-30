@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Version BuildValueType="FullDate">
   <Files>
-    <File>lib/build_buddy.rb</File>
+    <File>lib/swift_tools.rb</File>
+    <File>swift-tools.gemspec</File>
   </Files>
   <Tags>
-    <Major>1</Major>
-    <Minor>3</Minor>
+    <Major>2</Major>
+    <Minor>0</Minor>
     <Patch>0</Patch>
-    <Build>20160128</Build>
-    <Revision>4</Revision>
+    <Build>20160728</Build>
+    <Revision>0</Revision>
     <TimeZone>US/Pacific</TimeZone>
     <StartYear>2016</StartYear>
     <Company>John Lyon-Smith</Company>
-    <Product>Build Buddy</Product>
+    <Product>Swift Tools</Product>
     <Copyright>Copyright (c) 2016, John Lyon-Smith</Copyright>
   </Tags>
 </Version>
