@@ -32,6 +32,10 @@
 
 #pragma mark - Public methods
 
+- (int)test
+{
+}
+
 - (void)startObserveReachability
 {
     if (!self.noInternetConnectionView) {
