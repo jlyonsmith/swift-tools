@@ -2,16 +2,16 @@
 //  Copyright (c) 2015 RealSelf. All rights reserved.
 //
 
-@import Foundation
-@import Crashlytics
+import Foundation
+import Crashlytics
 // TODO: Add '#import "AFNetworkReachabilityManager.h"' to bridging header
 // TODO: Add '#import "RSNoInternetConnectionView.h"' to bridging header
 
-@objc let RSNotoficationDidChangeReachabilityStatus: NSString = "RSNotoficationDidChangeReachabilityStatus"
+// TODO: Add 'static let RSNotoficationDidChangeReachabilityStatus: String = "RSNotoficationDidChangeReachabilityStatus"' to one of your classes'
 
 @objc class RSReachability: NSObject{
     private var reachable: Bool
-    private(set) public var reachabilityStatus: AFNetworkReachabilityStatus
+    private(set) var reachabilityStatus: AFNetworkReachabilityStatus
     private var noInternetConnectionView: RSNoInternetConnectionView
     private var navigationOverlayView: UIView
     static let sharedInstance = RSReachability()
@@ -19,7 +19,7 @@
         return reachable
     }
 
-    private init() {}
+    private override init() {}
 
     func startObserveReachability() {    
         if !self.noInternetConnectionView {
@@ -30,7 +30,7 @@
             var screenHeight: CGFloat = screenRect.size.height
     
             self.noInternetConnectionView.frame = CGRectMake(0, 20, screenWidth, screenHeight - 20)
-            self.navigationOverlayView = UIView.alloc().initWithFrame(CGRectMake(0, 0, screenWidth, 64))
+            self.navigationOverlayView = UIView(frame: CGRectMake(0, 0, screenWidth, 64))
             self.navigationOverlayView.setBackgroundColor(UIColor.clearColor())
         }
         AFNetworkReachabilityManager.sharedManager().setReachabilityStatusChangeBlock({ (status: AFNetworkReachabilityStatus) in 
@@ -68,7 +68,7 @@
                 self.navigationOverlayView.removeFromSuperview()
             }
             UIView.commitAnimations()
-        )
+        })
     
         // start observing reachability.
         AFNetworkReachabilityManager.sharedManager().startMonitoring()

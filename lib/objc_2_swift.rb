@@ -120,7 +120,7 @@ module SwiftTools
         interface_data[:properties].each {|prop_name, prop_data|
           line = INDENT
           if prop_data[:readonly]
-            line += "private(set) public "
+            line += "private(set) "
           elsif prop_data[:visibility] == :private
             line += 'private '
           end
@@ -166,6 +166,10 @@ module SwiftTools
             line += 'private '
           end
 
+          if interface_data[:base]
+            line += 'override '
+          end
+
           line += "init() {"
 
           if init_data[:body].length > 0
@@ -206,6 +210,7 @@ module SwiftTools
             fix_null(body)
             fix_at_string(body)
             fix_broken_else(body)
+            fix_alloc_init(body)
             line += body + INDENT + "}\n"
           end
 
@@ -227,17 +232,35 @@ module SwiftTools
     def capture_imports(h_filename, content)
       r1 = ''
       r2 = ''
-      content.scan(/[@#]import\s*"?[\.a-zA-Z0-9_]+"?\s*;?\s*\n?/m).each {|m|
-        s = m.strip
+      content.to_enum(:scan, /[@#]import *"?([\.a-zA-Z0-9_]+)"? *;? *\n?/m).map { Regexp.last_match }.each {|m|
+        s = m[0].strip
         if s.start_with?("#")
           if s.index(h_filename).nil?
             r2 += "// TODO: Add '#{s}' to bridging header\n"
           end
         else
-          r1 += remove_eol_semicolons(s) + "\n"
+          r1 += "import #{m[1]}\n"
         end
       }
       {:at_imports => r1, :hash_imports => r2}
+    end
+
+    def capture_statics(content)
+      statics = ''
+      content.scan(/static *(.*?);/m) {|m|
+        decl = m[0]
+        decl.gsub!('const', '')
+        decl.gsub!('*', '')
+        decl.gsub!('@"', '"')
+        decl.scan(/([a-zA-Z0-9_\*]+) +([a-zA-Z0-9_\*]+)(?: *= *(.*))?/m) {|mm|
+          statics += "// TODO: Add 'static let #{mm[1]}: #{map_type(mm[0])}"
+          if mm[2]
+            statics += " = #{mm[2]}"
+          end
+          statics += "' to one of your classes'\n"
+        }
+      }
+      statics
     end
 
     def capture_interfaces(content, in_hdr)
@@ -315,24 +338,6 @@ module SwiftTools
       implementations
     end
 
-    def capture_statics(content)
-      statics = ''
-      content.scan(/static *(.*?);/m) {|m|
-        decl = m[0]
-        decl.gsub!('const', '')
-        decl.gsub!('*', '')
-        decl.gsub!('@"', '"')
-        decl.scan(/([a-zA-Z0-9_\*]+) +([a-zA-Z0-9_\*]+)(?: *= *(.*))?/m) {|mm|
-          statics += "@objc let #{mm[1]}: #{map_type(mm[0])}"
-          if mm[2]
-            statics += " = #{mm[2]}"
-          end
-          statics += "\n"
-        }
-      }
-      statics
-    end
-
     def convert_to_dot_syntax(content)
       # Repeatedly find a [] syntax method call that does not have a nested [] call
       # and convert it until done.
@@ -360,7 +365,7 @@ module SwiftTools
             arg = { :name => label_match[1]}
 
             if block_match = body.match(/ *(?:\(.*?\))?(?: |\n)\{/, label_match.offset(0)[1])
-              end_of_param = find_close_char_offset(body, block_match.offset(0)[1], '{', '}')
+              end_of_param = find_close_char_offset(body, block_match.offset(0)[1], '{', '}') + 1
             else
               # Find the next arg label or the end of the string
               next_label_match = body.match(param_label_re, label_match.offset(0)[1])
@@ -428,6 +433,15 @@ module SwiftTools
         params += "#{remove_ptr(pair[1])}: #{map_type(remove_ptr(pair[0]))}"
       }
       '(' + params + ')'
+    end
+
+    def fix_alloc_init(content)
+      content.gsub!(/([a-zA-Z0-9_]+)\.alloc\(\)\.init(?:With([a-zA-Z0-9_]+))?\(/) { |m|
+        r = "#{$1}("
+        if $2
+          r += $2[0].downcase + $2[1..-1] + ': '
+        end
+      }
     end
 
     def fix_if_statements(content)
@@ -509,6 +523,8 @@ module SwiftTools
         'Long'
       when 'void'
         'Void'
+      when 'NSString'
+        'String'
       when /(.*)\*/
         $1
       else
