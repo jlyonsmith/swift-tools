@@ -2,7 +2,7 @@ Gem::Specification.new do |s|
   s.name = 'swift-tools'
   s.version = "3.0.0"
   s.summary = %q{Tools for managing Swift source code}
-  s.description = %q{}
+  s.description = %q{A suite of tools for managing and converting to Swift source code, including space/tab indentation, rough C# to Swift and Objective to Swift conversion.}
   s.authors = ["John Lyon-smith"]
   s.email = "john@jamoki.com"
   s.platform = Gem::Platform::RUBY
