@@ -48,7 +48,11 @@ module SwiftTools
    end
 
     version SwiftTools::VERSION
-    description 'Rough Objective-C to Swift Converter'
+    description %Q(This tool does a rough conversion of Objective-C source code to Swift.  The goal of the tool
+is to do most of the stuff that simply requires a lot of typing effort, and allow you
+to concentrate on the more difficult aspects of the conversion, such as library and
+framework usage, use of let vs. var, etc.
+)
     arg :h_file, :required
     arg :m_file
     on("-o", "--output-file SWIFT_FILENAME", "The Swift output file.")

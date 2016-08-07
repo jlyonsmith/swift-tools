@@ -1,8 +1,8 @@
 task :default => :test
 
 VERSION = '3.0.0'
-BUILD = '20160807.0'
-TOOL = 'app-tools'
+BUILD = '20160807.1'
+TOOL = 'swift-tools'
 
 task :test do
   Dir.glob('./test/test_*.rb').each { |file| require file}
