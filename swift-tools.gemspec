@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'swift-tools'
-  s.version = "2.0.0"
+  s.version = "3.0.0"
   s.summary = %q{Tools for managing Swift source code}
   s.description = %q{}
   s.authors = ["John Lyon-smith"]
