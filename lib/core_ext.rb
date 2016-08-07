@@ -32,3 +32,9 @@ class String
   end
 
 end
+
+class Range
+  def self.make(a, exclude_end)
+    return Range.new(a[0], a[1], exclude_end)
+  end
+end
