@@ -3,9 +3,10 @@
   <Files>
     <File>lib/swift_tools.rb</File>
     <File>swift-tools.gemspec</File>
+    <File>Rakefile</File>
   </Files>
   <Tags>
-    <Major>2</Major>
+    <Major>3</Major>
     <Minor>0</Minor>
     <Patch>0</Patch>
     <Build>20160728</Build>
