@@ -119,6 +119,10 @@ module SwiftTools
         # Write properties
         interface_data[:properties].each {|prop_name, prop_data|
           line = INDENT
+          if prop_data[:ib_outlet]
+            line += "@IBOutlet "
+          end
+
           if prop_data[:readonly]
             line += "private(set) "
           elsif prop_data[:visibility] == :private
@@ -188,7 +192,15 @@ module SwiftTools
             line += 'private '
           end
 
-          line += "func #{method_name}()"
+          line += "func #{method_name}("
+          args = method_data[:args]
+          args.each_index {|i|
+            if i > 0
+              line += ", "
+            end
+            line += args[i][1] + ": " + args[i][0]
+          }
+          line += ")"
           if method_data[:return_type] and method_data[:return_type] != 'Void'
             line += " -> #{method_data[:return_type]}"
           end
@@ -265,7 +277,7 @@ module SwiftTools
 
     def capture_interfaces(content, in_hdr)
       interfaces = {}
-      content.scan(/^\s*@interface\s*([a-zA-Z0-9_]+)(?:\s*:\s*([a-zA-Z0-9_]+)\s*)?(?:\s*\(([a-zA-Z0-9_, ]*)\))?(?:\s*<(.+)>)?((?:.|\n)*?)@end *\n$/m).each {|m|
+      content.scan(/^\s*@interface *([a-zA-Z0-9_]+)(?: *: *([a-zA-Z0-9_]+) *)?(?: *\(([a-zA-Z0-9_, ]*)\))?(?: *<(.+)>)?((?:.|\n)*?)@end *\n$/m).each {|m|
         body = m[4]
         properties = extract_properties(body, in_hdr)
         methods = extract_methods(body, in_hdr)
@@ -284,10 +296,10 @@ module SwiftTools
 
     def extract_properties(content, in_hdr)
       properties = {}
-      content.scan(/^\s*@property\s*\(([a-zA-Z0-9_=, ]*)\)\s*([a-zA-Z0-9_\*]+)\s*([a-zA-Z0-9_\*]+)\s*/m) {|m|
-        name = $3
-        type = map_type(remove_ptr($2))
-        options = Hash[$1.split(',').map(&:strip).collect {|s|
+      content.to_enum(:scan, /^ *@property *\(([a-zA-Z0-9_=, ]*)\) *(IBOutlet)? *([a-zA-Z0-9_\*]+) *([a-zA-Z0-9_\*]+) */m).map { Regexp.last_match }.each {|m|
+        name = m[4]
+        type = map_type(remove_ptr(m[3]))
+        options = Hash[m[1].split(',').map(&:strip).collect {|s|
           a = s.split('=')
           if a.length > 1
             [a[0].to_sym, a[1]]
@@ -295,6 +307,9 @@ module SwiftTools
             [a[0].to_sym, true]
           end
         }]
+        if m[2]
+          options[:ib_outlet] = true
+        end
         properties[remove_ptr(name)] = {
             :type => type,
             :visibility => in_hdr ? :public : :private,
@@ -306,7 +321,7 @@ module SwiftTools
 
     def extract_methods(content, in_hdr)
       methods = {}
-      content.to_enum(:scan, /^ *(\+|-)? *\(([a-zA-Z0-9_]+)\) *([a-zA-Z0-9_]+)(?:[ \n]*\{)?/m).map { Regexp.last_match }.each {|m|
+      content.to_enum(:scan, /^ *(\+|-)? *\(([a-zA-Z0-9_]+)\) *([a-zA-Z0-9_]+)(?: *: *)?([^}]*){/m).map { Regexp.last_match }.each {|m|
         if in_hdr
           body = ''
         else
@@ -314,9 +329,11 @@ module SwiftTools
           body_end_offset = find_close_char_offset(content, body_start_offset, '{', '}') - 1
           body = indent_lines(content[body_start_offset..body_end_offset])
         end
+
         methods[m[3]] = {
           :scope => (m[1] == '+' ? :static : :instance),
           :return_type => map_type(remove_ptr(m[2])),
+          :args => capture_method_args(m[4]),
           :visibility => in_hdr ? :public : :private,
           :body => body
         }
@@ -336,6 +353,16 @@ module SwiftTools
         }
       }
       implementations
+    end
+
+    def capture_method_args(content)
+      args = []
+      raw_args = content.split(' ')
+      raw_args.each {|raw_arg|
+        m = raw_arg.match(/\((.*)\)(.*)/)
+        args.push([map_type(m[1]), m[2]])
+      }
+      args
     end
 
     def convert_to_dot_syntax(content)
@@ -508,7 +535,7 @@ module SwiftTools
     end
 
     def remove_ptr(content)
-      content.gsub('*', '')
+      content.gsub('*', '').strip
     end
 
     def map_type(content)
@@ -525,8 +552,8 @@ module SwiftTools
         'Void'
       when 'NSString'
         'String'
-      when /(.*)\*/
-        $1
+      when 'CGRect'
+        'CGRect'
       else
         content
       end
