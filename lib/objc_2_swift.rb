@@ -62,6 +62,7 @@ module SwiftTools
                 :scope => v1[:scope] || v2[:scope],
                 :return_type => v1[:return_type],
                 :visibility => v1[:visibility],
+                :args => v2[:args],
                 :body => v2[:body]
             }
           } if have_interface
@@ -112,10 +113,6 @@ module SwiftTools
         }
         interface_data[:properties].merge!(new_properties)
 
-        # line2 = INDENT + "public var #{prop_data[:getter]}: #{prop_data[:type]} { return #{prop_name} }\n"
-        # if prop_data[:getter]
-        #   line1 = INDENT + "private "
-
         # Write properties
         interface_data[:properties].each {|prop_name, prop_data|
           line = INDENT
@@ -147,6 +144,10 @@ module SwiftTools
 
           if prop_data[:type]
             line += ": #{prop_data[:type]}"
+          end
+
+          unless prop_data[:notnull]
+            line += '!'
           end
 
           if prop_data[:initializer]
@@ -279,8 +280,8 @@ module SwiftTools
       interfaces = {}
       content.scan(/^\s*@interface *([a-zA-Z0-9_]+)(?: *: *([a-zA-Z0-9_]+) *)?(?: *\(([a-zA-Z0-9_, ]*)\))?(?: *<(.+)>)?((?:.|\n)*?)@end *\n$/m).each {|m|
         body = m[4]
-        properties = extract_properties(body, in_hdr)
-        methods = extract_methods(body, in_hdr)
+        properties = capture_properties(body, in_hdr)
+        methods = capture_methods(body, in_hdr)
 
         interfaces[m[0]] = {
           :base => m[1],
@@ -294,7 +295,7 @@ module SwiftTools
       interfaces
     end
 
-    def extract_properties(content, in_hdr)
+    def capture_properties(content, in_hdr)
       properties = {}
       content.to_enum(:scan, /^ *@property *\(([a-zA-Z0-9_=, ]*)\) *(IBOutlet)? *([a-zA-Z0-9_\*]+) *([a-zA-Z0-9_\*]+) */m).map { Regexp.last_match }.each {|m|
         name = m[4]
@@ -319,9 +320,9 @@ module SwiftTools
       properties
     end
 
-    def extract_methods(content, in_hdr)
+    def capture_methods(content, in_hdr)
       methods = {}
-      content.to_enum(:scan, /^ *(\+|-)? *\(([a-zA-Z0-9_]+)\) *([a-zA-Z0-9_]+)(?: *: *)?([^}]*){/m).map { Regexp.last_match }.each {|m|
+      content.to_enum(:scan, /^ *(\+|-)? *\(([a-zA-Z0-9_]+)\) *([a-zA-Z0-9_]+)(?: *: *)?([^}]*?){/m).map { Regexp.last_match }.each {|m|
         if in_hdr
           body = ''
         else
@@ -345,7 +346,7 @@ module SwiftTools
       implementations = {}
       content.scan(/^\s*@implementation *([a-zA-Z0-9_]+)((?:.|\n)*?)@end *\n$/m).each {|m|
         body = m[1]
-        methods = extract_methods(body, in_hdr = false)
+        methods = capture_methods(body, in_hdr = false)
 
         implementations[m[0]] = {
             :methods => methods,
