@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    swift-tools (3.2.0)
+    swift-tools (3.3.0)
       methadone (~> 1.9)
 
 GEM
@@ -28,4 +28,4 @@ DEPENDENCIES
   swift-tools!
 
 BUNDLED WITH
-   1.12.5
+   1.13.2

@@ -392,7 +392,7 @@ module SwiftTools
           param_label_re = /(?:\n| )+([a-zA-Z0-9_]+) *:/
           label_match = body.match(param_label_re, obj_match.offset(0)[1])
 
-          begin
+          unless label_match.nil?
             arg = { :name => label_match[1]}
 
             if block_match = body.match(/ *(?:\(.*?\))?(?: |\n)\{/, label_match.offset(0)[1])
