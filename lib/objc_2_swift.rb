@@ -358,10 +358,13 @@ module SwiftTools
 
     def capture_method_args(content)
       args = []
-      raw_args = content.split(' ')
+      raw_args = content.gsub(/ *\*/, '*')
+      raw_args = raw_args.split(' ') # The only space left should be between the args
       raw_args.each {|raw_arg|
         m = raw_arg.match(/\((.*)\)(.*)/)
-        args.push([map_type(m[1]), m[2]])
+        unless m.nil?
+          args.push([map_type(remove_ptr(m[1])), m[2]])
+        end
       }
       args
     end
@@ -427,7 +430,7 @@ module SwiftTools
     def convert_var_decls(content)
       # Note, this must be done _before_ removing EOL semicolons
       content.gsub!(/^( *)([a-zA-Z0-9_\*]+) +([a-zA-Z0-9_\*]+)(?: *= *(.*?))? *;/m) {|m|
-        decl = "#{$1}var #{$3}: #{map_type(remove_ptr($2))}"
+        decl = "#{$1}var #{remove_ptr($3)}: #{map_type(remove_ptr($2))}"
         if $4
           decl += " = #{$4}"
         end
