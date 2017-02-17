@@ -1,7 +1,7 @@
 task :default => :test
 
-VERSION = '3.3.1'
-BUILD = '20170216.0'
+VERSION = '3.3.2'
+BUILD = '20170216.1'
 TOOL = 'swift-tools'
 
 task :test do
