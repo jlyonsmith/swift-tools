@@ -1,9 +1,10 @@
 #!/usr/bin/env ruby
 
 require 'rubygems'
-require 'bundler/setup'
+require 'bundler'
 require 'methadone'
-require 'swift_tools'
+require_relative 'swift_tools'
+require_relative 'csharp_2_swift'
 
 module SwiftTools
   class Tool
@@ -17,7 +18,7 @@ module SwiftTools
       end
 
       cs_file = File.new(cs_filename, "r")
-      swift_filename = options[:swift_filename]
+      swift_filename = options[:o]
 
       if swift_filename.nil?
         swift_file = STDOUT
@@ -28,7 +29,9 @@ module SwiftTools
       tool = Csharp2Swift.new
       tool.execute(cs_file, swift_file, options)
 
-      info "\"#{cs_filename}\" -> \"#{swift_filename}\""
+      unless swift_filename.nil?
+        info "\"#{cs_filename}\" -> \"#{swift_filename}\""
+      end
 
       tool.renamed_vars.each {|k,v| puts k + ' -> ' + v}
       tool.renamed_methods.each {|k,v| puts k + '() -> ' + v + '()'}
