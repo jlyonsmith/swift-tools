@@ -1,4 +1,4 @@
-require_relative './core_ext.rb'
+require 'swift_tools/core_ext.rb'
 
 module SwiftTools
   class Csharp2Swift

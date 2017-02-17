@@ -3,8 +3,8 @@
 require 'rubygems'
 require 'bundler'
 require 'methadone'
-require_relative 'objc_2_swift'
-require_relative 'swift_tools'
+require 'swift_tools/objc_2_swift'
+require 'swift_tools/version'
 
 module SwiftTools
   class Tool
